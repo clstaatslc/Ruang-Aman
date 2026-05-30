@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuangAman</title>
+    <style>
+        /* --- PENGATURAN DASAR --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #e5e7eb; display: flex; justify-content: center; padding: 20px; }
+        
+        /* --- KOTAK APLIKASI (MIMIC HP) --- */
+        .app-container {
+            width: 100%;
+            max-width: 380px;
+            background-color: #f8fafc;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+            min-height: 750px;
+        }
+
+        /* --- HALAMAN --- */
+        .page { display: none; padding-bottom: 20px; }
+        .page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HEADER BIRU --- */
+        .header { background-color: #1a56db; color: white; padding: 30px 20px 40px 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .header h1 { font-size: 24px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .back-btn { background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
+
+        /* --- KONTEN UMUM --- */
+        .content { padding: 0 20px; margin-top: -20px; }
+        .section-title { font-size: 12px; font-weight: bold; color: #6b7280; text-transform: uppercase; margin: 20px 0 10px 0; letter-spacing: 0.5px; }
+        
+        /* --- BERANDA & MOOD TRACKER --- */
+        .mood-container { display: flex; justify-content: space-between; background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: opacity 0.3s ease; }
+        .mood-item { text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .mood-item:hover { transform: scale(1.1); }
+        .mood-emoji { font-size: 28px; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+        .mood-item:nth-child(1) .mood-emoji { background-color: #def7ec; }
+        .mood-item:nth-child(2) .mood-emoji { background-color: #e1effe; }
+        .mood-item:nth-child(3) .mood-emoji { background-color: #fef3c7; }
+        .mood-item:nth-child(4) .mood-emoji { background-color: #fde8e8; }
+        .mood-label { font-size: 12px; color: #374151; font-weight: 500; }
+        
+        /* Pesan Terima Kasih Mood */
+        .mood-thanks { display: none; background-color: #def7ec; color: #03543f; padding: 15px; border-radius: 16px; font-size: 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); animation: fadeIn 0.4s ease; border: 1px solid #bcf0da; margin-bottom: 15px; }
+
+        /* Menu Cards */
+        .menu-card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #f3f4f6; transition: background 0.2s; }
+        .menu-card:hover { background: #f9fafb; }
+        .menu-card.green { background-color: #def7ec; border-color: #bcf0da; }
+        .menu-card.yellow { background-color: #fef3c7; border-color: #fde68a; }
+        .menu-card.blue { background-color: #e1effe; border-color: #bfdbfe; }
+        .menu-icon { font-size: 24px; margin-right: 15px; }
+        .menu-text { flex: 1; }
+        .menu-text h3 { font-size: 15px; color: #111827; margin-bottom: 2px; }
+        .menu-text p { font-size: 12px; color: #6b7280; }
+        .menu-arrow { margin-left: auto; color: #9ca3af; font-weight: bold; }
+
+        /* --- FORM STYLES --- */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 5px; margin-top: 10px; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; background-color: #f9fafb; outline: none; }
+        .form-control:focus { border-color: #1a56db; background-color: white; }
+        textarea.form-control { height: 80px; resize: none; }
+
+        .btn-submit { width: 100%; background-color: #1a56db; color: white; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(26, 86, 219, 0.2); }
+        .btn-submit:hover { background-color: #1e429f; }
+
+        /* Pill Radio Buttons */
+        .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill-group input[type="radio"] { display: none; }
+        .pill-group label { padding: 8px 16px; background-color: #f3f4f6; border-radius: 20px; font-size: 13px; color: #4b5563; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .pill-group input[type="radio"]:checked + label { background-color: #e1effe; color: #1e429f; border-color: #1e429f; }
+
+        /* --- TIPS & INFO CARDS --- */
+        .tip-card { background: white; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 4px solid #1a56db; }
+        .tip-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .badge-mental { background-color: #e1effe; color: #1e429f; }
+        .badge-akademik { background-color: #fde8e8; color: #9b1c1c; }
+        .badge-selflove { background-color: #fef3c7; color: #723b13; }
+        .badge-teman { background-color: #def7ec; color: #03543f; }
+        .badge-bully { background-color: #fee2e2; color: #b91c1c; border: 1px solid #f87171;}
+        .tip-card h4 { font-size: 15px; color: #111827; margin-bottom: 5px; }
+        .tip-card p { font-size: 13px; color: #4b5563; line-height: 1.4; }
+		
+		/* PROFIL GURU BK */
+.guru-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.guru-foto {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e1effe;
+    margin-bottom: 12px;
+}
+
+.guru-card h3 {
+    color: #111827;
+    margin-bottom: 5px;
+}
+
+.guru-card p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div id="home-page" class="page active">
+        <div class="header">
+            <h1>🛡️ RuangAman</h1>
+            <p>Hai, kamu tidak sendirian</p>
+        </div>
+
+        <div class="content">
+            <div id="mood-section">
+                <div class="section-title">MOOD HARI INI</div>
+                <div class="mood-container">
+                    <div class="mood-item" onclick="sendMood('Happy')"><div class="mood-emoji">😄</div><div class="mood-label">Happy</div></div>
+                    <div class="mood-item" onclick="sendMood('Biasa')"><div class="mood-emoji">🙂</div><div class="mood-label">Biasa</div></div>
+                    <div class="mood-item" onclick="sendMood('Down')"><div class="mood-emoji">😔</div><div class="mood-label">Down</div></div>
+                    <div class="mood-item" onclick="sendMood('Berat')"><div class="mood-emoji">😫</div><div class="mood-label">Berat</div></div>
+                </div>
+            </div>
+            
+            <div id="mood-thanks" class="mood-thanks">
+                <strong>Terima kasih sudah berbagi! ✨</strong><br>
+                Perasaanmu hari ini sangat berharga.
+            </div>
+
+            <div class="section-title" style="margin-top: 25px;">YANG BISA KAMU LAKUKAN</div>
+			<div class="menu-card blue" onclick="showPage('profil-bk')">
+				<div class="menu-icon">👩‍🏫</div>
+				<div class="menu-text">
+					<h3>Profil Guru BK</h3>
+					<p>Lihat informasi Guru BK</p>
+				</div>
+				<div class="menu-arrow">></div>
+			</div>
+            
+            <div class="menu-card green" onclick="showPage('form-cerita')">
+                <div class="menu-icon">💬</div>
+                <div class="menu-text">
+                    <h3>Cerita Yuk</h3>
+                    <p>Curhat aman & rahasia</p>
+                </div>
+                <div class="menu-arrow">></div>
+            </div>
+
+            <div class="menu-card yellow" onclick="showPage('form-jadwal')">
+                <div class="menu-icon">📅</div>
+                <div class="menu-text">
+                    <h3>Jadwal Bertemu</h3>
+                    <p>Pilih waktu ketemu Guru BK</p>
+                </div>
+                <div class="menu-arrow">></div>
+            </div>
+
+            <div class="menu-card blue" onclick="showPage('halaman-tips')">
+                <div class="menu-icon">💡</div>
+                <div class="menu-text">
+                    <h3>Tips & Info</h3>
+                    <p>Bacaan ringan penguat hari</p>
+                </div>
+                <div class="menu-arrow">></div>
+            </div>
+        </div>
+    </div>
+
+	<div id="profil-bk" class="page">
+    <div class="header" style="background-color:#0f766e;">
+        <button class="back-btn" onclick="showPage('home-page')">
+            ← Profil Guru BK
+        </button>
+        <p style="font-size:13px;">
+            Kenali Guru BK yang siap mendengarkanmu
+        </p>
+    </div>
+
+    <div class="content">
+
+        <div class="guru-card">
+            <img src="buaryanti.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Aryanti</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+
+        <div class="guru-card">
+            <img src="buherlin.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Herlin</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+
+        <div class="guru-card">
+            <img src="busalsa.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Salsa</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+		
+		<div class="guru-card">
+            <img src="bunairi.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Nairi</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+		
+		<div class="guru-card">
+            <img src="buetik.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Etik</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+		
+		<div class="guru-card">
+            <img src="buajeng.jpeg"
+                 alt="Guru BK"
+                 class="guru-foto">
+
+            <h3>Ibu Ajeng</h3>
+            <p>
+                Guru BK SMAN 18 Bekasi.
+                Siap mendengarkan, mendampingi, dan membantu siswa menemukan solusi terbaik untuk setiap permasalahan yang dihadapi.
+            </p>
+        </div>
+
+    </div>
+</div>
+		<div id="form-cerita" class="page">
+        <div class="header">
+            <button class="back-btn" onclick="showPage('home-page')">← Cerita Yuk</button>
+            <p style="font-size: 13px;">Tenang, ini rahasia banget</p>
+        </div>
+        <div class="content">
+            <form id="curhatForm" onsubmit="submitCerita(event)">
+                <div class="form-group">
+                    <label>Nama (boleh inisial)</label>
+                    <input type="text" id="nama-cerita" class="form-control" placeholder="wajib diisi" required>
+                </div>
+                <div class="form-group">
+                    <label>Kelas</label>
+                    <input type="text" id="kelas-cerita" class="form-control" placeholder="wajib diisi" required>
+                </div>
+                <div class="form-group">
+                    <label>Topik yang mau dibahas</label>
+                    <div class="pill-group">
+                        <input type="radio" id="t1" name="topik" value="Diri sendiri" checked>
+                        <label for="t1" class="topic-1">Diri sendiri</label>
+                        
+                        <input type="radio" id="t2" name="topik" value="Teman">
+                        <label for="t2" class="topic-2">Teman</label>
+                        
+                        <input type="radio" id="t3" name="topik" value="Keluarga">
+                        <label for="t3" class="topic-3">Keluarga</label>
+
+                        <input type="radio" id="t4" name="topik" value="Belajar">
+                        <label for="t4" class="topic-1">Belajar</label>
+
+                        <input type="radio" id="t5" name="topik" value="Cinta">
+                        <label for="t5" class="topic-3">Cinta</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cerita singkat</label>
+                    <textarea id="isi-cerita" class="form-control" placeholder="Lagi ada masalah? Sini cerita..." required></textarea>
+                </div>
+				<div class="form-group">
+                    <label>Seberapa mendesak?</label>
+                    <div class="pill-group">
+                        <input type="radio" id="m1" name="mendesak" value="Biasa aja" checked>
+                        <label for="m1" class="urg-1">Biasa saja</label>
+                        
+                        <input type="radio" id="m2" name="mendesak" value="Lumayan">
+                        <label for="m2" class="urg-2">Lumayan</label>
+                        
+                        <input type="radio" id="m3" name="mendesak" value="Banget">
+                        <label for="m3" class="urg-3">Sangat</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">✈️ Kirim</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="form-jadwal" class="page">
+        <div class="header" style="background-color: #d97706;">
+            <button class="back-btn" onclick="showPage('home-page')">← Jadwal Bertemu</button>
+            <p style="font-size: 13px;">Atur waktu luangmu untuk ngobrol</p>
+        </div>
+        <div class="content">
+            <form id="jadwalForm" onsubmit="submitJadwal(event)">
+                <div class="form-group">
+                    <label>Nama Lengkap / Panggilan</label>
+                    <input type="text" id="nama-jadwal" class="form-control" placeholder="Masukkan namamu..." required>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal Pertemuan</label>
+                    <input type="date" id="tanggal-jadwal" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Jam Bertemu</label>
+                    <input type="time" id="jam-jadwal" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Pilih Guru BK</label>
+                    <select id="guru-jadwal" "class="form-control" required>
+                        <option value="" disabled selected>Pilih Guru BK...</option>
+                        <option>Ibu Aryanti</option>
+                        <option>Ibu Herlin</option>
+                        <option>Ibu Salsa</option>
+						<option>Ibu Nairi</option>
+						<option>Ibu Etik</option>
+						<option>Ibu Ajeng</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit" style="background-color: #d97706;">📅 Booking Jadwal</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="halaman-tips" class="page">
+        <div class="header" style="background-color: #0284c7;">
+            <button class="back-btn" onclick="showPage('home-page')">← Tips & Info</button>
+            <p style="font-size: 13px;">Semangat hari ini, kamu pasti bisa!</p>
+        </div>
+        <div class="content" style="margin-top: 10px;">
+            <div class="tip-card" style="border-left-color: #1e429f;">
+                <span class="tip-badge badge-mental">Mental Health</span>
+                <h4>Jangan memendam sendiri</h4>
+                <p>Ceritakan masalahmu pada orang yang kamu percaya. Beban yang dibagi akan terasa lebih ringan.</p>
+            </div>
+            <div class="tip-card" style="border-left-color: #9b1c1c;">
+                <span class="tip-badge badge-akademik">Akademik</span>
+                <h4>Cerita itu tidak memalukan</h4>
+                <p>Kamu tidak harus sempurna setiap hari. Gagal di satu ujian bukan berarti kamu gagal selamanya.</p>
+            </div>
+            <div class="tip-card" style="border-left-color: #d97706;">
+                <span class="tip-badge badge-selflove">Self Love</span>
+                <h4>Kamu berharga apa adanya</h4>
+                <p>Berhenti membandingkan dirimu dengan pencapaian orang lain. Kamu punya cerita dan waktumu sendiri.</p>
+            </div>
+            <div class="tip-card" style="border-left-color: #03543f;">
+                <span class="tip-badge badge-teman">Pertemanan</span>
+                <h4>Teman baik tidak menjatuhkan</h4>
+                <p>Carilah lingkungan yang suportif. Teman yang sejati akan membantumu tumbuh, bukan membuatmu *down*.</p>
+            </div>
+            <div class="tip-card" style="border-left-color: #b91c1c;">
+                <span class="tip-badge badge-bully">Stop Bullying</span>
+                <h4>Bullying bukan salahmu</h4>
+                <p>Jika kamu mengalaminya, jangan diam. Segera cari bantuan orang dewasa yang terpercaya atau lapor ke BK.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Fungsi untuk memproses klik mood
+    async function sendMood(moodPilihan) {
+
+    try {
+
+        await fetch(
+            "https://script.google.com/macros/s/AKfycbx_PFmJwOHXwp8GCT3jfMONXYJJt4fwF0KoY23EBwD6YJDxfnTkiauarQ4_iMeNbnmaig/exec",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    tipe: "mood",
+                    mood: moodPilihan
+                })
+            }
+        );
+
+        document.getElementById('mood-section').style.display = 'none';
+        document.getElementById('mood-thanks').style.display = 'block';
+
+    } catch(error) {
+
+        alert("Gagal menyimpan mood.");
+        console.error(error);
+
+    }
+}
+
+    function showPage(pageId) {
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    async function submitCerita(event) {
+    event.preventDefault();
+
+    const nama = document.getElementById('nama-cerita').value;
+    const kelas = document.getElementById('kelas-cerita').value;
+    const cerita = document.getElementById('isi-cerita').value;
+
+    const topik = document.querySelector('input[name="topik"]:checked').value;
+    const mendesak = document.querySelector('input[name="mendesak"]:checked').value;
+
+    const data = {
+		tipe:"cerita",
+        nama: nama,
+        kelas: kelas,
+        topik: topik,
+        cerita: cerita,
+        mendesak: mendesak
+    };
+
+    try {
+
+        await fetch(
+            "https://script.google.com/macros/s/AKfycbx_PFmJwOHXwp8GCT3jfMONXYJJt4fwF0KoY23EBwD6YJDxfnTkiauarQ4_iMeNbnmaig/exec",
+            {
+                method: "POST",
+                body: JSON.stringify(data)
+            }
+        );
+
+        alert("Terima kasih " + nama + ", ceritamu berhasil dikirim ke ruang aman BK!");
+
+        document.getElementById('curhatForm').reset();
+
+        showPage('home-page');
+
+    } catch(error) {
+
+        alert("Terjadi kesalahan saat mengirim data.");
+
+        console.error(error);
+    }
+}
+
+    async function submitJadwal(event) {
+
+    event.preventDefault();
+
+    const nama = document.getElementById('nama-jadwal').value;
+    const tanggal = document.getElementById('tanggal-jadwal').value;
+    const jam = document.getElementById('jam-jadwal').value;
+    const guru = document.getElementById('guru-jadwal').value;
+
+    const data = {
+        tipe: "jadwal",
+        nama: nama,
+        tanggal: tanggal,
+        jam: jam,
+        guru: guru
+    };
+
+    try {
+
+        await fetch(
+            "https://script.google.com/macros/s/AKfycbx_PFmJwOHXwp8GCT3jfMONXYJJt4fwF0KoY23EBwD6YJDxfnTkiauarQ4_iMeNbnmaig/exec",
+            {
+                method: "POST",
+                body: JSON.stringify(data)
+            }
+        );
+
+        alert("Sip " + nama + "! Permintaan jadwalmu sudah masuk. Silakan tunggu konfirmasi dari ruang BK ya.");
+
+        document.getElementById('jadwalForm').reset();
+
+        showPage('home-page');
+
+    } catch(error) {
+
+        alert("Gagal mengirim jadwal.");
+
+        console.error(error);
+
+    }
+}
+</script>
+
+</body>
+</html>
+
